@@ -9,7 +9,11 @@ export class SimpleNavigation {
     let InitialRoute = this.pages[options.initialRouteName];
     this.stackRouter.push({ screen: InitialRoute.screen, state: 1, switch: 'current', id: 1, routerName: options.initialRouteName });
     this.maxId = 1;
-    this.screenView1 = (
+    utils.simpleNavigation = this;
+    let navigationBar = [config.navigationBarExtend(this.getCurrentScreen().screen.navigationOptions), {}];
+    // this.getPrevScreen();
+    utils.simpleNavigation.navigationBar = navigationBar;
+    return () => (
       <ScreenContainer
         ref={r => {
           if (r) {
@@ -20,10 +24,6 @@ export class SimpleNavigation {
         stackRouter={this.stackRouter}
       />
     );
-    utils.simpleNavigation = this;
-    let navigationBar = [config.navigationBarExtend(this.getCurrentScreen().screen.navigationOptions), {}];
-    // this.getPrevScreen();
-    utils.simpleNavigation.navigationBar = navigationBar;
   }
   screenView: React.ReactElement;
   /**所有配置的页面 */
