@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
+import { Dimensions } from 'react-native';
 import { tPages, Nav, NavigationBarProps } from './type/nav';
 import { utils } from './utils';
 import { ScreenContainer } from './screencontainer';
 import { config } from './config';
+let pwidth = Dimensions.get('screen').width;
+config.screenWidth = pwidth;
 export class SimpleNavigation {
   constructor(pages: tPages, options = {}) {
     this.pages = pages;

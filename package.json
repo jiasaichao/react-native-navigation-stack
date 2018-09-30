@@ -1,6 +1,6 @@
 {
   "name": "react-native-navigation-stack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Routing and navigation for your React Native apps",
   "keywords": [
     "react-native",
@@ -16,7 +16,10 @@
     "type": "git",
     "url": "git+https://github.com/jiasaichao/react-native-navigation-stack.git"
   },
-  "author": "jiasaichao <jiasaichao@hotmail.com>",
+  "author": {
+    "name": "jiasaichao",
+    "email": "jiasaichao@hotmail.com"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/jiasaichao/react-native-navigation-stack/issues"
