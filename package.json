@@ -1,5 +1,5 @@
 {
-  "name": "react-native-simple-navigation",
+  "name": "react-native-navigation-stack",
   "version": "0.1.0",
   "description": "Routing and navigation for your React Native apps",
   "keywords": [
@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jiasaichao/react-native-simple-navigation.git"
+    "url": "git+https://github.com/jiasaichao/react-native-navigation-stack.git"
   },
   "author": "jiasaichao <jiasaichao@hotmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jiasaichao/react-native-simple-navigation/issues"
+    "url": "https://github.com/jiasaichao/react-native-navigation-stack/issues"
   },
-  "homepage": "https://github.com/jiasaichao/react-native-simple-navigation#readme"
+  "homepage": "https://github.com/jiasaichao/react-native-navigation-stack#readme"
 }

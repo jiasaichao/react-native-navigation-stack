@@ -1,1 +1,1 @@
-# react-native-simple-navigation
+# react-native-navigation-stack
