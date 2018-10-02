@@ -98,6 +98,24 @@ export class SimpleNavigation {
 
     // utils.navigationBar.back();
   };
+  /**
+   * 置返回隐藏属性，主要是为了滑动松手的时候如果是恢复原位需要隐藏的那个页面也要有动画。
+   * 这个问题原因是如果新打开一个页面push当前页面这是为backHide，这个时候返回恢复是好的，但是如果返回两级就有问题，原来的backHide已经变为了none
+   */
+  setBackHide = () => {
+    this.stackRouter.forEach((item, index) => {
+      if (this.stackRouter.length - 2 == index) {
+        item.switch = 'backHide';
+      }
+    });
+  };
+  /**
+   * 复原
+   */
+  restore = () => {
+    this.setBackHide();
+    this.screenView.refresh();
+  };
   /**替换当前页并加载新页面 */
   replace = () => {};
   /**跳转到最顶层页面 */
