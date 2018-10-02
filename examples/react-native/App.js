@@ -8,7 +8,9 @@
 
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Dimensions } from 'react-native';
-import { SimpleNavigation } from 'react-native-navigation-stack';
+// import { SimpleNavigation } from 'react-native-navigation-stack';
+// import { config } from '../../src/config';
+import { SimpleNavigation } from './src';
 
 class HomeScreen extends React.Component {
   static navigationOptions = {
