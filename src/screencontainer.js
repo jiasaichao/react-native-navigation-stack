@@ -66,7 +66,7 @@ export class ScreenContainer extends Component<P> {
     return (
       <View style={{ flex: 1 }} {...this._panResponder.panHandlers}>
         {this.props.stackRouter.map((item, index) => {
-          return <NavigationBar1 key={item.id} id={item.id} sort={index} switch={item.switch} />;
+          return <NavigationBar1 key={item.id} id={item.id} state={item.state} switch={item.switch} />;
         })}
         {this.props.stackRouter.map((item, index) => {
           let Aaaa = item.screen;
@@ -76,12 +76,6 @@ export class ScreenContainer extends Component<P> {
             </Transitioner>
           );
         })}
-        <View style={{ marginTop: 94, position: 'absolute', zIndex: 77 }}>
-          <Button title="确定" onPress={this.queding} />
-        </View>
-        <View style={{ marginTop: 94, left: 80, position: 'absolute', zIndex: 77 }}>
-          <Button title="返回" onPress={this.fanhui} />
-        </View>
       </View>
     );
   }

@@ -1,24 +1,15 @@
 import React, { Component } from 'react';
-import { Dimensions } from 'react-native';
 import { tPages, Nav, NavigationBarProps } from './type/nav';
 import { utils } from './utils';
 import { ScreenContainer } from './screencontainer';
 import { config } from './config';
-let pwidth = Dimensions.get('screen').width;
-config.screenWidth = pwidth;
 export class SimpleNavigation {
   constructor(pages: tPages, options = {}) {
     this.pages = pages;
     let InitialRoute = this.pages[options.initialRouteName];
     this.stackRouter.push({ screen: InitialRoute.screen, state: 1, switch: 'current', id: 1, routerName: options.initialRouteName });
     this.maxId = 1;
-    utils.simpleNavigation = this;
-    //修改默认配置
-    config.navigationBarOptions = config.navigationBarExtend(options.navigationOptions);
-    // let navigationBar = [config.navigationBarExtend(this.getCurrentScreen().screen.navigationOptions), {}];
-    // this.getPrevScreen();
-    // utils.simpleNavigation.navigationBar = navigationBar;
-    return () => (
+    this.screenView1 = (
       <ScreenContainer
         ref={r => {
           if (r) {
@@ -29,6 +20,10 @@ export class SimpleNavigation {
         stackRouter={this.stackRouter}
       />
     );
+    utils.simpleNavigation = this;
+    let navigationBar = [config.navigationBarExtend(this.getCurrentScreen().screen.navigationOptions), {}];
+    // this.getPrevScreen();
+    utils.simpleNavigation.navigationBar = navigationBar;
   }
   screenView: React.ReactElement;
   /**所有配置的页面 */
@@ -54,11 +49,6 @@ export class SimpleNavigation {
   /**跳转到新页面 */
   push = (routerName, params) => {
     if (this.isTransitionRunning) {
-      return;
-    }
-    //不存在这个页面
-    if (!(routerName in this.pages)) {
-      console.warn(`push的页面“${routerName}”不存在`);
       return;
     }
     this.stackRouter.forEach(item => {
@@ -105,24 +95,6 @@ export class SimpleNavigation {
 
     // utils.navigationBar.back();
   };
-  /**
-   * 置返回隐藏属性，主要是为了滑动松手的时候如果是恢复原位需要隐藏的那个页面也要有动画。
-   * 这个问题原因是如果新打开一个页面push当前页面这是为backHide，这个时候返回恢复是好的，但是如果返回两级就有问题，原来的backHide已经变为了none
-   */
-  setBackHide = () => {
-    this.stackRouter.forEach((item, index) => {
-      if (this.stackRouter.length - 2 == index) {
-        item.switch = 'backHide';
-      }
-    });
-  };
-  /**
-   * 复原
-   */
-  restore = () => {
-    this.setBackHide();
-    this.screenView.refresh();
-  };
   /**替换当前页并加载新页面 */
   replace = () => {};
   /**跳转到最顶层页面 */
@@ -131,11 +103,3 @@ export class SimpleNavigation {
     this.isTransitionRunning = value;
   };
 }
-export const Action = {
-  push: () => {
-    utils.simpleNavigation.push();
-  },
-  back: () => {
-    utils.simpleNavigation.back();
-  }
-};

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Dimensions, Animated, Easing, Button, PanResponder } from 'react-native';
+import { View, Text, Dimensions, Animated, Easing, Button, PanResponder, Image, ImageBackground } from 'react-native';
 import { tSwitch } from './type/enum';
 import { config } from './config';
 import { utils } from './utils';
@@ -35,15 +35,24 @@ export class Transitioner extends Component<P> {
   }
   render() {
     const { sort } = this.props;
+    let navigationOptions = utils.getNavigationOptionsById(this.props.id);
+    let barStyle = { height: 64 };
+    if (navigationOptions.headerBackground) {
+      barStyle.backgroundColor = navigationOptions.headerBackground;
+    }
+    let shadowTop = 64;
+    if (navigationOptions.headerBackground != config.navigationBarOptions.headerBackground) {
+      shadowTop = 0;
+    }
     return (
       <Animated.View
         style={{
-          backgroundColor: '#f66',
+          // backgroundColor: '#f66',
           height: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
+          // justifyContent: 'center',
+          // alignItems: 'center',
           position: 'absolute',
-          top: 64,
+          top: 0,
           right: 0,
           bottom: 0,
           left: 0,
@@ -59,6 +68,14 @@ export class Transitioner extends Component<P> {
         //   transform: [{ translateX: this.state.value }]
         // }}
       >
+        <ImageBackground
+          resizeMode="repeat"
+          source={require('./assets/shadow.png')}
+          style={{ top: shadowTop, bottom: 0, width: 5, position: 'absolute', zIndex: 9999999, left: -5 }}
+        />
+        {/* <Image source={require('./assets/shadow.png')}  /> */}
+
+        <View style={barStyle} />
         {this.props.children}
       </Animated.View>
     );

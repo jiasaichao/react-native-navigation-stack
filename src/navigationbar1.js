@@ -5,10 +5,32 @@ import { utils } from './utils';
 import { config } from './config';
 let pwidth = Dimensions.get('screen').width;
 const defaultBackImage = require('./assets/back-icon.png');
+const styles = {
+  root: {
+    // backgroundColor: '#fff',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 64,
+    paddingTop: 20,
+    paddingLeft: 15,
+    paddingRight: 15,
+    // borderBottomWidth: Theme.navSeparatorLineWidth,
+    // borderBottomColor: Theme.navSeparatorColor,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+    // ...navigationBar.headerStyle
+  }
+};
 export class NavigationBar1 extends Component<> {
   constructor(props) {
     super(props);
     utils.simpleNavigation.stackRouter.find(item => item.id == this.props.id).header = this;
+    if (this.props.state == 1) {
+      this.zIndex = 10000;
+    }
+    // this.myRef=React.createRef();
     switch (this.props.switch) {
       case 'current':
         this.state.opacity = new Animated.Value(1);
@@ -33,45 +55,40 @@ export class NavigationBar1 extends Component<> {
     }
   }
   state = {};
+  zIndex = 9999;
   render() {
-    let navigationBar = config.navigationBarExtend(
-      utils.simpleNavigation.stackRouter.find(item => item.id == this.props.id).screen.navigationOptions
-    );
+    let navigationBar = utils.getNavigationOptionsById(this.props.id);
     let backImage = null;
     let headerTitle = null;
     if (navigationBar.isHeaderBack) {
-      backImage = (
-        <Image
-          source={navigationBar.headerBackImage ? navigationBar.headerBackImage : defaultBackImage}
-          style={{
-            height: 21,
-            width: 13,
-            //   marginLeft: 9,
-            marginRight: 8,
-            marginVertical: 12,
-            resizeMode: 'contain'
-          }}
-        />
-      );
+      if (React.isValidElement(navigationBar.headerBackImage)) {
+        backImage = navigationBar.headerBackImage;
+      } else {
+        backImage = (
+          <Image
+            source={navigationBar.headerBackImage ? navigationBar.headerBackImage : defaultBackImage}
+            style={{
+              height: 21,
+              width: 13,
+              //   marginLeft: 9,
+              marginRight: 8,
+              marginVertical: 12,
+              resizeMode: 'contain'
+            }}
+          />
+        );
+      }
       headerTitle = <Text style={{ fontSize: 15 }}>{navigationBar.headerBackTitle}</Text>;
     }
     //#region 样式
     let styleRoot = {
-      // backgroundColor: '#fff',
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      height: 64,
-      paddingTop: 20,
-      paddingLeft: 15,
-      paddingRight: 15,
-      // borderBottomWidth: Theme.navSeparatorLineWidth,
-      // borderBottomColor: Theme.navSeparatorColor,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999
+      ...styles.root,
+      zIndex: this.zIndex
+      // ...navigationBar.headerStyle
     };
+    // if (navigationBar.headerBackground) {
+    //   styleRoot.backgroundColor = navigationBar.headerBackground;
+    // }
     let titleCommonStyle = {
       position: 'absolute',
       left: 0,
@@ -108,20 +125,33 @@ export class NavigationBar1 extends Component<> {
     let leftStyle = {
       ...leftCommonStyle,
       opacity: this.state.opacity,
-      zIndex: 2
+      zIndex: 2,
+      ...navigationBar.headerLeftStyle
     };
     let rightStyle = {
       ...rightCommonStyle,
       opacity: this.state.opacity,
-      zIndex: 2
+      zIndex: 2,
+      ...navigationBar.headerRightStyle
     };
     //#endregion
     // let { title } = this.props.data;
     return (
-      <View style={styleRoot}>
-        <Animated.View style={titleStyle}>{this.renderElement(navigationBar.headerTitle)}</Animated.View>
+      <View
+        ref={r => {
+          if (r) {
+            this.root = r;
+          }
+        }}
+        style={styleRoot}
+      >
+        <Animated.View style={titleStyle}>{this.renderElement(navigationBar.headerTitle, navigationBar.headerTitleStyle)}</Animated.View>
         <Animated.View style={leftStyle}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              utils.simpleNavigation.back();
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {backImage}
               {headerTitle}
@@ -135,14 +165,23 @@ export class NavigationBar1 extends Component<> {
       </View>
     );
   }
-  renderElement(title) {
+  renderElement(title, headerTitleStyle) {
     if (!title) {
       return null;
     }
     if (React.isValidElement(title)) {
       return title;
     } else {
-      return <Text style={{ fontSize: 18 }}>{title}</Text>;
+      return (
+        <Text
+          style={{
+            fontSize: 18,
+            ...headerTitleStyle
+          }}
+        >
+          {title}
+        </Text>
+      );
     }
   }
   update = callBack => {
@@ -179,6 +218,25 @@ export class NavigationBar1 extends Component<> {
   }
   componentWillReceiveProps(nextProps) {
     // console.log('nextProps', nextProps);
+    if (nextProps.state == 1 && this.zIndex == 9999) {
+      this.zIndex = 10000;
+      this.root.setNativeProps({
+        style: {
+          ...styles.root,
+          zIndex: this.zIndex
+        }
+      });
+    } else {
+      if (this.zIndex == 10000) {
+        this.zIndex = 9999;
+        this.root.setNativeProps({
+          style: {
+            ...styles.root,
+            zIndex: this.zIndex
+          }
+        });
+      }
+    }
     switch (nextProps.switch) {
       case 'current':
         this.startAnimated(true, 0, 0, false);
