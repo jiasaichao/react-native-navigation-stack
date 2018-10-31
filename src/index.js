@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
 import { Dimensions } from 'react-native';
-import { tPages, Nav, NavigationBarProps } from './type/nav';
+import { tPages, NavigationBarProps } from './type/nav';
 import { utils } from './utils';
 import { ScreenContainer } from './screencontainer';
 import { config } from './config';
+import { NavigationItem } from './navigationitem';
 let pwidth = Dimensions.get('screen').width;
 config.screenWidth = pwidth;
 export class SimpleNavigation {
   constructor(pages: tPages, options = {}) {
-    this.pages = pages;
-    let InitialRoute = this.pages[options.initialRouteName];
-    this.stackRouter.push({ screen: InitialRoute.screen, state: 1, switch: 'current', id: 1, routerName: options.initialRouteName });
-    this.maxId = 1;
-    utils.simpleNavigation = this;
     //修改默认配置
     config.navigationBarOptions = config.navigationBarExtend(options.navigationOptions);
+    this.pages = pages;
+    let InitialRoute = this.pages[options.initialRouteName];
+    let startItem = new NavigationItem({
+      screen: InitialRoute.screen,
+      state: 1,
+      toggleMode: 'current',
+      id: 1,
+      routerName: options.initialRouteName,
+      params: options.initialRouteParams
+    });
+    startItem.headerOptions = utils.getNavigationOptions(
+      1,
+      InitialRoute.screen.navigationOptions,
+      options.initialRouteParams,
+      startItem.setParams
+    ); //初始的页眉
+    this.stackRouter.push(startItem);
+    this.maxId = 1;
+    utils.simpleNavigation = this;
+
     // let navigationBar = [config.navigationBarExtend(this.getCurrentScreen().screen.navigationOptions), {}];
     // this.getPrevScreen();
     // utils.simpleNavigation.navigationBar = navigationBar;
@@ -34,7 +50,7 @@ export class SimpleNavigation {
   /**所有配置的页面 */
   pages: tPages = {};
   /**堆栈路由，所有已经打开的页面都会保存到这里 */
-  stackRouter: Array<Nav> = [];
+  stackRouter: Array<NavigationItem> = [];
   /**头部页眉数据 */
   navigationBar: NavigationBarProps;
   /**获取当前显示屏幕信息 */
@@ -69,13 +85,18 @@ export class SimpleNavigation {
         item.switch = 'backHide';
       }
     });
-    let router: Nav = {
-      screen: this.pages[routerName].screen,
+    let screen = this.pages[routerName].screen;
+    let router: NavigationItem = new NavigationItem({
+      screen,
       routerName: routerName,
       state: 1,
-      switch: 'pushCurrent',
+      toggleMode: 'pushCurrent',
       id: this.maxId + 1
-    };
+    });
+    router.headerOptions = utils.getNavigationOptions(this.maxId + 1, screen.navigationOptions, params, router.setParams); //初始的页眉
+    if (params !== undefined) {
+      router.params = params;
+    }
     this.stackRouter.push(router);
     this.maxId = router.id;
     // console.log(this.screenView1);
@@ -132,8 +153,8 @@ export class SimpleNavigation {
   };
 }
 export const Action = {
-  push: () => {
-    utils.simpleNavigation.push();
+  push: (name, params) => {
+    utils.simpleNavigation.push(name, params);
   },
   back: () => {
     utils.simpleNavigation.back();

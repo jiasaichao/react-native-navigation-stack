@@ -5,77 +5,92 @@ import { utils } from './utils';
 import { config } from './config';
 let pwidth = Dimensions.get('screen').width;
 const defaultBackImage = require('./assets/back-icon.png');
-export class NavigationBar extends Component<{ data: NavigationBarProps }> {
+const styles = {
+  root: {
+    // backgroundColor: '#fff',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 64,
+    // paddingTop: 20,
+    paddingLeft: 15,
+    paddingRight: 15,
+    // borderBottomWidth: Theme.navSeparatorLineWidth,
+    // borderBottomColor: Theme.navSeparatorColor,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+    // ...navigationBar.headerStyle
+  }
+};
+export class NavigationBar extends Component<> {
   constructor(props) {
     super(props);
-    utils.navigationBar = this;
+    let id = this.props.navigation.id;
+    utils.simpleNavigation.stackRouter.find(item => item.id == id).header = this;
+    if (this.props.state == 1) {
+      this.zIndex = 10000;
+    }
+    // this.myRef=React.createRef();
+    switch (this.props.switch) {
+      case 'current':
+        this.state.opacity = new Animated.Value(1);
+        this.state.translateX = new Animated.Value(0);
+        break;
+      case 'backCurrent':
+        this.state.opacity = new Animated.Value(0);
+        this.state.translateX = new Animated.Value(0);
+        break;
+      case 'pushCurrent':
+        this.state.opacity = new Animated.Value(0);
+        this.state.translateX = new Animated.Value(pwidth / 2);
+        break;
+      case 'backHide':
+        this.state.opacity = new Animated.Value(1);
+        this.state.translateX = new Animated.Value(0);
+        break;
+      case 'pushHide':
+        this.state.opacity = new Animated.Value(1);
+        this.state.translateX = new Animated.Value(0);
+        break;
+    }
   }
-  state = {
-    /**当前显示的透明度 */
-    opacity: new Animated.Value(1),
-    /**下一页的透明度 */
-    opacityNext: new Animated.Value(0),
-    /**当前显标题的位置 */
-    translateX: new Animated.Value(0),
-    /**下一页标题的位置 */
-    translateXNext: new Animated.Value(pwidth / 2)
-  };
+  state = {};
+  zIndex = 9999;
   render() {
-    let navigationBar = utils.simpleNavigation.navigationBar[0];
-    let navigationBarNext = utils.simpleNavigation.navigationBar[1];
+    let id = this.props.navigation.id;
+    let navigationBar = utils.getNavigationOptionsById(id);
     let backImage = null;
     let headerTitle = null;
-    let backImageNext = null;
-    let headerTitleNext = null;
-    if (navigationBar.isHeaderBack) {
-      backImage = (
-        <Image
-          source={navigationBar.headerBackImage ? navigationBar.headerBackImage : defaultBackImage}
-          style={{
-            height: 21,
-            width: 13,
-            //   marginLeft: 9,
-            marginRight: 8,
-            marginVertical: 12,
-            resizeMode: 'contain'
-          }}
-        />
-      );
+    if (navigationBar.isHeaderBack && !utils.isRoot(id)) {
+      if (React.isValidElement(navigationBar.headerBackImage)) {
+        backImage = navigationBar.headerBackImage;
+      } else {
+        backImage = (
+          <Image
+            source={navigationBar.headerBackImage ? navigationBar.headerBackImage : defaultBackImage}
+            style={{
+              height: 21,
+              width: 13,
+              //   marginLeft: 9,
+              marginRight: 8,
+              marginVertical: 12,
+              resizeMode: 'contain'
+            }}
+          />
+        );
+      }
       headerTitle = <Text style={{ fontSize: 15 }}>{navigationBar.headerBackTitle}</Text>;
-    }
-    if (navigationBarNext.isHeaderBack) {
-      backImageNext = (
-        <Image
-          source={navigationBarNext.headerBackImage ? navigationBarNext.headerBackImage : defaultBackImage}
-          style={{
-            height: 21,
-            width: 13,
-            //   marginLeft: 9,
-            marginRight: 8,
-            marginVertical: 12,
-            resizeMode: 'contain'
-          }}
-        />
-      );
-      headerTitleNext = <Text style={{ fontSize: 15 }}>{navigationBarNext.headerBackTitle}</Text>;
     }
     //#region 样式
     let styleRoot = {
-      // backgroundColor: '#fff',
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      height: 64,
-      paddingTop: 20,
-      paddingLeft: 15,
-      paddingRight: 15,
-      // borderBottomWidth: Theme.navSeparatorLineWidth,
-      // borderBottomColor: Theme.navSeparatorColor,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999
+      ...styles.root,
+      zIndex: this.zIndex
+      // ...navigationBar.headerStyle
     };
+    // if (navigationBar.headerBackground) {
+    //   styleRoot.backgroundColor = navigationBar.headerBackground;
+    // }
     let titleCommonStyle = {
       position: 'absolute',
       left: 0,
@@ -112,157 +127,165 @@ export class NavigationBar extends Component<{ data: NavigationBarProps }> {
     let leftStyle = {
       ...leftCommonStyle,
       opacity: this.state.opacity,
-      zIndex: 2
+      zIndex: 2,
+      ...navigationBar.headerLeftStyle
     };
     let rightStyle = {
       ...rightCommonStyle,
       opacity: this.state.opacity,
-      zIndex: 2
-    };
-    let titleNextStyle = {
-      ...titleCommonStyle,
-      opacity: this.state.opacityNext,
-      zIndex: 1,
-      transform: [{ translateX: this.state.translateXNext }]
-    };
-    let leftNextStyle = {
-      ...leftCommonStyle,
-      opacity: this.state.opacityNext,
-      zIndex: 1
-    };
-    let rightNextStyle = {
-      ...rightCommonStyle,
-      opacity: this.state.opacityNext,
-      zIndex: 1
+      zIndex: 2,
+      ...navigationBar.headerRightStyle
     };
     //#endregion
     // let { title } = this.props.data;
     return (
-      <View style={styleRoot}>
-        <Animated.View style={titleStyle}>{this.renderElement(navigationBar.headerTitle)}</Animated.View>
-        <Animated.View style={leftStyle}>
-          <TouchableOpacity>
+      <View
+        ref={r => {
+          if (r) {
+            this.root = r;
+          }
+        }}
+        style={styleRoot}
+      >
+        <Animated.View style={titleStyle}>{this.renderElement(navigationBar.headerTitle, navigationBar.headerTitleStyle)}</Animated.View>
+        <Animated.View style={[leftStyle]}>
+          <TouchableOpacity
+            onPress={() => {
+              utils.simpleNavigation.back();
+            }}
+            style={{ height: '100%', justifyContent: 'center' }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {backImage}
               {headerTitle}
             </View>
           </TouchableOpacity>
+          {navigationBar.headerLeft}
         </Animated.View>
         <Animated.View style={rightStyle}>
           {navigationBar.headerRight}
           {/* <Text style={{ fontSize: 15 }}>我的</Text> */}
         </Animated.View>
-
-        <Animated.View style={titleNextStyle}>{this.renderElement(navigationBarNext.headerTitle)}</Animated.View>
-        <Animated.View style={leftNextStyle}>
-          <TouchableOpacity>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {backImage}
-              {headerTitle}
-            </View>
-          </TouchableOpacity>
-        </Animated.View>
-        <Animated.View style={rightNextStyle}>{navigationBarNext.headerRight}</Animated.View>
       </View>
     );
   }
-  renderElement(title) {
+  renderElement(title, headerTitleStyle) {
     if (!title) {
       return null;
     }
     if (React.isValidElement(title)) {
       return title;
     } else {
-      return <Text style={{ fontSize: 18 }}>{title}</Text>;
+      return (
+        <Text
+          style={{
+            fontSize: 18,
+            ...headerTitleStyle
+          }}
+        >
+          {title}
+        </Text>
+      );
     }
   }
   update = callBack => {
     this.forceUpdate(callBack);
   };
 
-  /**
-   * 下一页
-   * 首先此时数据已经为最新，也就是最终展示效果的数据
-   * 需要把最新展示页面放到next里面然后动画移动到，应该显示的位置
-   */
-  next = () => {
-    let navigationBar = [
-      config.navigationBarExtend(utils.simpleNavigation.getCurrentScreen().screen.navigationOptions),
-      config.navigationBarExtend(utils.simpleNavigation.getPrevScreen().screen.navigationOptions)
-    ];
+  setValue = (opacity, translateX = null) => {
+    this.state.opacity.setValue(opacity);
+    if (translateX !== null) {
+      this.state.translateX.setValue(translateX);
+    }
+    // this.state.opacity.setValue(utils.dxToValue(1, v));
+    // this.state.opacityNext.setValue(1 - utils.dxToValue(1, v));
+    // this.state.translateXNext.setValue(utils.dxToValue(pwidth / 2, v));
+  };
+  componentDidMount() {
+    switch (this.props.switch) {
+      case 'current':
+        this.startAnimated(true, 0, null, false);
+        break;
+      case 'backCurrent':
+        this.startAnimated(true, 0);
+        break;
+      case 'pushCurrent':
+        this.startAnimated(true, 0);
+        break;
+      case 'backHide':
+        this.startAnimated(false, 0);
+        break;
+      case 'pushHide':
+        this.startAnimated(false, pwidth / 2);
+        break;
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    // console.log('nextProps', nextProps);
+    if (nextProps.state == 1 && this.zIndex == 9999) {
+      this.zIndex = 10000;
+      this.root.setNativeProps({
+        style: {
+          ...styles.root,
+          zIndex: this.zIndex
+        }
+      });
+    } else {
+      if (this.zIndex == 10000) {
+        this.zIndex = 9999;
+        this.root.setNativeProps({
+          style: {
+            ...styles.root,
+            zIndex: this.zIndex
+          }
+        });
+      }
+    }
+    switch (nextProps.switch) {
+      case 'current':
+        this.startAnimated(true, 0, 0, false);
+        break;
+      case 'backCurrent':
+        this.startAnimated(true, 0, 0);
+        break;
+      case 'pushCurrent':
+        this.startAnimated(true, 0, pwidth / 2);
+        break;
+      case 'backHide':
+        // console.log('backHide');
+        this.startAnimated(false, 0, 0);
+        break;
+      case 'pushHide':
+        this.startAnimated(false, pwidth / 2, 0);
+        break;
+    }
+  }
+  animatedInit(show, startValue) {
+    this.state.opacity.setValue(show ? 0 : 1);
+    this.state.translateX.setValue(startValue);
+  }
+  startAnimated(show: boolean, targetValue, startValue = null, isAndimated = true) {
+    if (isAndimated) {
+      if (startValue !== null && !utils.simpleNavigation.isResponding) {
+        this.animatedInit(show, startValue);
+      }
 
-    utils.simpleNavigation.navigationBar = navigationBar;
-    this.state.opacity.setValue(0);
-    this.state.opacityNext.setValue(1);
-    this.state.translateX.setValue(pwidth / 2);
-    this.state.translateXNext.setValue(0);
-    this.forceUpdate(() => {
       Animated.timing(this.state.opacity, {
         ...config.DefaultTransitionSpec,
-        toValue: 1,
-        useNativeDriver: true
-      }).start(function() {});
-      Animated.timing(this.state.opacityNext, {
-        ...config.DefaultTransitionSpec,
-        toValue: 0,
+        toValue: show ? 1 : 0,
         useNativeDriver: true
       }).start(function() {});
       Animated.timing(this.state.translateX, {
         ...config.DefaultTransitionSpec,
-        toValue: 0,
+        toValue: targetValue,
         useNativeDriver: true
       }).start(function() {});
-    });
-    // this.setState(
-    //   {
-    //     /**当前显示的透明度 */
-    //     opacity: new Animated.Value(1),
-    //     /**下一页的透明度 */
-    //     opacityNext: new Animated.Value(1),
-    //     /**当前显标题的位置 */
-    //     translateX: new Animated.Value(pwidth / 2),
-    //     /**下一页标题的位置 */
-    //     translateXNext: new Animated.Value(0)
-    //   },
-    //   () => {
-    //     // return;
-
-    //   }
-    // );
-    // utils.simpleNavigation.navigationBar[1] = config.navigationBarExtend(utils.simpleNavigation.getCurrentScreen().screen.navigationOptions);
-  };
-  back = () => {
-    let navigationBar = [
-      config.navigationBarExtend(utils.simpleNavigation.getCurrentScreen().screen.navigationOptions),
-      config.navigationBarExtend(utils.simpleNavigation.getPrevScreen().screen.navigationOptions)
-    ];
-
-    utils.simpleNavigation.navigationBar = navigationBar;
-    this.state.opacity.setValue(0);
-    this.state.opacityNext.setValue(1);
-    this.state.translateX.setValue(0);
-    this.state.translateXNext.setValue(0);
-    this.forceUpdate(() => {
-      Animated.timing(this.state.opacity, {
-        ...config.DefaultTransitionSpec,
-        toValue: 1,
-        useNativeDriver: true
-      }).start(function() {});
-      Animated.timing(this.state.opacityNext, {
-        ...config.DefaultTransitionSpec,
-        toValue: 0,
-        useNativeDriver: true
-      }).start(function() {});
-      Animated.timing(this.state.translateXNext, {
-        ...config.DefaultTransitionSpec,
-        toValue: pwidth / 2,
-        useNativeDriver: true
-      }).start(function() {});
-    });
-  };
-  setValue = v => {
-    this.state.opacity.setValue(utils.dxToValue(1, v));
-    this.state.opacityNext.setValue(1 - utils.dxToValue(1, v));
-    this.state.translateXNext.setValue(utils.dxToValue(pwidth / 2, v));
-  };
+    } else {
+      this.state.opacity.setValue(show ? 1 : 0);
+      this.state.translateX.setValue(targetValue);
+    }
+  }
+  shouldComponentUpdate() {
+    return false;
+  }
 }

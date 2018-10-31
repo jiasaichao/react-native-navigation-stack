@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Dimensions, Animated, Easing, Button, PanResponder, Image, ImageBackground } from 'react-native';
+import { View, Text, Dimensions, Animated, Easing, Button, PanResponder, Image, ImageBackground, Keyboard } from 'react-native';
 import { tSwitch } from './type/enum';
 import { config } from './config';
 import { utils } from './utils';
@@ -98,6 +98,7 @@ export class Transitioner extends Component<P> {
     }
   }
   startAnimated(targetValue, startValue = null, isAndimated = true) {
+    Keyboard.dismiss();
     if (startValue != null && !utils.simpleNavigation.isResponding) {
       this.state.position.setValue(startValue);
     }

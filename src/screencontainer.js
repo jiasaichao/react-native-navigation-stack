@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text, Dimensions, Animated, Easing, Button, PanResponder } from 'react-native';
+import { View, Text, Dimensions, Animated, Easing, Button, PanResponder, Keyboard } from 'react-native';
 import { utils } from './utils';
 import { tSwitch } from './type/enum';
 import { Transitioner } from './transitioner';
 import { config } from './config';
-import { Nav } from './type/nav';
 import { NavigationBar } from './navigationbar';
-import { NavigationBar1 } from './navigationbar1';
+import { NavigationItem } from './navigationitem';
 let pwidth = Dimensions.get('screen').width;
 
 /**拖拽释放后动画执行的最大时间ms，实际应小于此值因为剩余距离总是小于全部距离 */
@@ -25,7 +24,7 @@ const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 25;
 const GESTURE_RESPONSE_DISTANCE_VERTICAL = 135;
 
 type P = {
-  stackRouter: Array<Nav>
+  stackRouter: Array<NavigationItem>
 };
 /**
  * 1.滑动的距离超过一定距离才成立 ✅
@@ -66,13 +65,27 @@ export class ScreenContainer extends Component<P> {
     return (
       <View style={{ flex: 1 }} {...this._panResponder.panHandlers}>
         {this.props.stackRouter.map((item, index) => {
-          return <NavigationBar1 key={item.id} id={item.id} state={item.state} switch={item.switch} />;
+          return (
+            <NavigationBar
+              key={item.id}
+              navigation={{ params: item.params, id: item.id, setParams: item.setParams }}
+              state={item.state}
+              switch={item.switch}
+            />
+          );
         })}
         {this.props.stackRouter.map((item, index) => {
           let Aaaa = item.screen;
           return (
             <Transitioner key={item.id} id={item.id} sort={index} switch={item.switch}>
-              <Aaaa />
+              <Aaaa
+                navigation={{ params: item.params, id: item.id, setParams: item.setParams }}
+                ref={r => {
+                  if (r) {
+                    item._this = r;
+                  }
+                }}
+              />
             </Transitioner>
           );
         })}
@@ -141,6 +154,7 @@ export class ScreenContainer extends Component<P> {
 
   // 开始手势操作。给用户一些视觉反馈，让他们知道发生了什么事情！
   onPanResponderGrant = (evt, gestureState) => {
+    Keyboard.dismiss();
     utils.simpleNavigation.isResponding = true;
     //1.停止动画
     //2.记录手势事件处理开始时的起始信息
